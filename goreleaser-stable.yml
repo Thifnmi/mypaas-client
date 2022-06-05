@@ -1,0 +1,52 @@
+# goreleaser.yml
+# Build customization
+project_name: tsuru
+builds:
+- main: ./tsuru/main.go
+  binary: tsuru
+  goos:
+    - windows
+    - darwin
+    - linux
+  goarch:
+    - amd64
+    - 386
+    - arm64
+  ignore:
+    - goos: darwin
+      goarch: 386
+    - goos: windows
+      goarch: arm64
+
+# Archive customization
+archives:
+- name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}_{{.Arch}}"
+  format: tar.gz
+  replacements:
+    darwin: macOS
+  format_overrides:
+    - goos: windows
+      format: zip
+  files:
+    - misc/bash-completion
+    - misc/zsh-completion
+
+# Mac OS Homebrew
+brews:
+  # Reporitory to push the tap to.
+- tap:
+    owner: tsuru
+    name: homebrew-tsuru
+
+  description: "tsuru-client is a tsuru command line tool for application developers."
+  homepage: "https://docs.tsuru.io/stable/"
+
+  # Folder inside the repository to put the formula.
+  # Default is the root folder.
+  folder: Formula
+
+  # Custom install
+  install: |
+    bin.install "tsuru"
+    bash_completion.install "misc/bash-completion" => "tsuru"
+    zsh_completion.install "misc/zsh-completion" => "tsuru"
